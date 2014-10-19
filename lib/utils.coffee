@@ -27,9 +27,9 @@ exports.build_upload_params = build_upload_params = (options) ->
     colors: options.colors,
     type: options.type,
     eager: exports.build_eager(options.eager),
-    use_filename: options.use_filename, 
-    unique_filename: options.unique_filename, 
-    discard_original_filename: options.discard_original_filename, 
+    use_filename: options.use_filename,
+    unique_filename: options.unique_filename,
+    discard_original_filename: options.discard_original_filename,
     notification_url: options.notification_url,
     eager_notification_url: options.eager_notification_url,
     eager_async: options.eager_async,
@@ -57,10 +57,10 @@ exports.build_array = build_array = (arg) ->
   if !arg?
     []
   else if _.isArray(arg)
-    arg 
-  else 
+    arg
+  else
     [arg]
-    
+
 exports.encode_double_array = encode_double_array = (array) ->
   array = build_array(array)
   if array.length > 0 and _.isArray(array[0])
@@ -70,7 +70,7 @@ exports.encode_double_array = encode_double_array = (array) ->
 
 exports.encode_key_value = encode_key_value = (arg) ->
   if _.isObject(arg)
-    pairs = for k, v of arg 
+    pairs = for k, v of arg
       "#{k}=#{v}"
     pairs.join("|")
   else
@@ -81,14 +81,14 @@ exports.build_eager = build_eager = (transformations) ->
     transformation = _.clone(transformation)
     _.filter([generate_transformation_string(transformation), transformation.format], present).join("/")
   ).join("|")
-    
+
 exports.build_custom_headers = build_custom_headers = (headers) ->
   if !headers?
     return undefined
-  else if _.isArray(headers) 
+  else if _.isArray(headers)
     ;
   else if _.isObject(headers)
-    headers = [k + ": " + v for k, v of headers]    
+    headers = [k + ": " + v for k, v of headers]
   else
     return headers
   return headers.join("\n")
@@ -123,9 +123,9 @@ exports.generate_transformation_string = generate_transformation_string = (optio
   named_transformation = []
   if _.filter(base_transformations, _.isObject).length > 0
     base_transformations = _.map(base_transformations, (base_transformation) ->
-      if _.isObject(base_transformation) 
-        generate_transformation_string(_.clone(base_transformation)) 
-      else 
+      if _.isObject(base_transformation)
+        generate_transformation_string(_.clone(base_transformation))
+      else
         generate_transformation_string(transformation: base_transformation)
     )
   else
@@ -203,7 +203,7 @@ exports.updateable_resource_params = updateable_resource_params = (options, para
   params.background_removal = options.background_removal if options.background_removal?
 
   params
-  
+
 exports.url = cloudinary_url = (public_id, options = {}) ->
   type = option_consume(options, "type", "upload")
   options.fetch_format ?= option_consume(options, "format") if type is "fetch"
@@ -231,13 +231,13 @@ exports.url = cloudinary_url = (public_id, options = {}) ->
 
   if public_id.match(/^https?:/)
     return public_id if type is "upload" or type is "asset"
-    public_id = encodeURIComponent(public_id).replace(/%3A/g, ":").replace(/%2F/g, "/") 
-  else 
+    public_id = encodeURIComponent(public_id).replace(/%3A/g, ":").replace(/%2F/g, "/")
+  else
     public_id = encodeURIComponent(decodeURIComponent(public_id)).replace(/%3A/g, ":").replace(/%2F/g, "/")
-    public_id += "." + format if format  
+    public_id += "." + format if format
 
   shared_domain = !private_cdn
-  if secure        
+  if secure
     if !secure_distribution || secure_distribution == exports.OLD_AKAMAI_SHARED_CDN
       secure_distribution = (if private_cdn then "#{cloud_name}-res.cloudinary.com" else exports.SHARED_CDN)
     shared_domain ||= secure_distribution == exports.SHARED_CDN
@@ -253,14 +253,14 @@ exports.url = cloudinary_url = (public_id, options = {}) ->
     type = undefined
 
   version ?= 1 if public_id.search("/") >= 0 && !public_id.match(/^v[0-9]+/) && !public_id.match(/^https?:\//)
-  
+
   rest = [transformation, (if version then "v" + version else ""), public_id ].filter((part) -> part != "" and part != null).join("/")
   if sign_url
     shasum = crypto.createHash('sha1')
     shasum.update(utf8_encode(rest + api_secret))
     signature = shasum.digest('base64').replace(/\//g,'_').replace(/\+/g,'-').substring(0, 8)
     rest = "s--#{signature}--/" + rest
-    
+
   url = [ prefix, resource_type, type, rest ].join("/")
   url.replace(/([^:])\/+/g, "$1/")
 
@@ -365,14 +365,14 @@ exports.merge = (hash1, hash2) ->
   result = {}
   result[k] = hash1[k] for k, v of hash1
   result[k] = hash2[k] for k, v of hash2
-  result 
+  result
 
 exports.sign_request = (params, options = {}) ->
   api_key = options.api_key ? config().api_key ? throw("Must supply api_key")
   api_secret = options.api_secret ? config().api_secret ? throw("Must supply api_secret")
 
   params = exports.clear_blank(params)
-  
+
   params.signature = exports.api_sign_request(params, api_secret)
   params.api_key = api_key
 
@@ -388,11 +388,11 @@ exports.process_request_params = (params, options) ->
 
 exports.private_download_url = (public_id, format, options = {}) ->
   params = exports.sign_request({
-    timestamp: exports.timestamp(), 
-    public_id: public_id, 
-    format: format, 
+    timestamp: exports.timestamp(),
+    public_id: public_id,
+    format: format,
     type: options.type,
-    attachment: options.attachment, 
+    attachment: options.attachment,
     expires_at: options.expires_at
   }, options)
 
@@ -400,7 +400,7 @@ exports.private_download_url = (public_id, format, options = {}) ->
 
 exports.zip_download_url = (tag, options = {}) ->
   params = exports.sign_request({
-    timestamp: exports.timestamp(), 
+    timestamp: exports.timestamp(),
     tag: tag,
     transformation: exports.generate_transformation_string(options)
   }, options)
@@ -413,16 +413,26 @@ exports.html_attrs = (options) ->
 
 
 CLOUDINARY_JS_CONFIG_PARAMS = ['api_key', 'cloud_name', 'private_cdn', 'secure_distribution', 'cdn_subdomain']
-exports.cloudinary_js_config = ->  
+exports.cloudinary_js_config = ->
   params = {}
   for param in CLOUDINARY_JS_CONFIG_PARAMS
     value = config()[param]
     params[param] = value if value?
   "<script type='text/javascript'>\n" +
       "$.cloudinary.config(" + JSON.stringify(params) + ");\n" +
-      "</script>\n";    
+      "</script>\n";
 
-v1_result_adapter = (callback) -> 
+exports.cloudinary_js_config_no_plugin = ->
+  params = {}
+  for param in CLOUDINARY_JS_CONFIG_PARAMS
+    value = config()[param]
+    params[param] = value if value?
+
+  "<script type='text/javascript'>\n" +
+  "  window.cloudinaryJSConfig = " + JSON.stringify(params) + ";\n" +
+  "</script>\n";
+
+v1_result_adapter = (callback) ->
   if callback?
     return (result) ->
       if result.error?
@@ -432,7 +442,7 @@ v1_result_adapter = (callback) ->
   else
     null
 
-v1_adapter = (name, num_pass_args, v1) -> 
+v1_adapter = (name, num_pass_args, v1) ->
   return (args...) ->
     pass_args = _.first(args, num_pass_args)
     options = args[num_pass_args]
@@ -447,4 +457,3 @@ v1_adapter = (name, num_pass_args, v1) ->
 exports.v1_adapters = (exports, v1, mapping) ->
   for name, num_pass_args of mapping
     exports[name] = v1_adapter(name, num_pass_args, v1)
-
